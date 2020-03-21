@@ -1,0 +1,16 @@
+{
+  "name": "json-validator",
+  "version": "1.0.0",
+  "description": "Simple json validator",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": ["json", "validator", "schema"],
+  "author": "ToScale",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^25.1.0",
+    "prettier": "^1.19.1"
+  }
+}
