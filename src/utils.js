@@ -7,10 +7,11 @@ module.exports.typeOf = function(variable) {
 };
 
 module.exports.BaseValidationError = class BaseValidationError extends Error {
-  constructor(message, property) {
+  constructor(message, property, path = "") {
     super();
     this.name = "BaseValidationError";
     this.message = message;
     this.property = property;
+    this.path = path;
   }
 };

@@ -23,7 +23,8 @@ test("test", async () => {
       validations: {
         // rules for validation
         in: ["a", "b", "qwe"],
-        regexp: "/*"
+        regexp: "/*",
+        min: 0
       }
     },
     {

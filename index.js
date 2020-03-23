@@ -21,23 +21,16 @@ class JsonValidator {
     options.default("validations", schema, []);
     options.default("meta", schema, {});
     try {
-      options.required(schema.name, object, schema.required);
+      options.required(schema.name, object, schema.required, path);
       options.equalType(
         schema.name,
         object,
         schema.type,
+        path,
         this._options["convert"]
       );
     } catch (e) {
-      if (this._options["abortEarly"]) {
-        throw e;
-      }
-      this._errors.push({
-        type: e.name,
-        message: e.message,
-        property: schema.name,
-        path
-      });
+      this._handlerError(e);
     }
     if ("default" in schema && !(schema.name in object)) {
       object[schema.name] = schema.default;
@@ -50,25 +43,17 @@ class JsonValidator {
             schema.name,
             keyValidation,
             result,
-            schema.validations[keyValidation]
+            schema.validations[keyValidation],
+            path
           );
         } catch (e) {
-          if (e instanceof utils.BaseValidationError) {
-            if (this._options["abortEarly"]) {
-              throw e;
-            }
-            this._errors.push({
-              type: e.name,
-              message: e.message,
-              property: e.property,
-              path
-            });
-          }
+          this._handlerError(e);
         }
       } else {
         throw new utils.BaseValidationError(
           `Validation rule ${keyValidation} not found`,
-          keyValidation
+          schema.name,
+          path
         );
       }
     }
@@ -76,7 +61,7 @@ class JsonValidator {
   }
   async _validateStrongType(object, schema, path) {
     options.default("children", schema, []);
-    let result = schema.type === "object" ? {} : [];
+    let result = {};
     for (const child of schema.children) {
       const resultValidation = await this._validateMain(
         object[schema.name],
@@ -95,7 +80,11 @@ class JsonValidator {
       for (const schemaKey of Object.keys(schema)) {
         const objectValidation = schemaKey in object ? object[schemaKey] : {};
         result.push(
-          await this._validateMain(objectValidation, schema[schemaKey])
+          await this._validateMain(
+            objectValidation,
+            schema[schemaKey],
+            path + "/" + schemaKey
+          )
         );
       }
       return result;
@@ -116,11 +105,14 @@ class JsonValidator {
     try {
       result = await this._validateMain(object, schema, ".");
     } catch (e) {
-      this._errors.push({
-        type: e.name,
-        message: e.message,
-        property: e.property
-      });
+      if (e instanceof utils.BaseValidationError) {
+        this._errors.push({
+          type: e.name,
+          message: e.message,
+          property: e.property,
+          path: e.path
+        });
+      }
     }
     return {
       result,
@@ -138,18 +130,32 @@ class JsonValidator {
       );
     }
   }
-  checkValidator(nameValue, validatorName, value, validatorOptions) {
+  checkValidator(nameValue, validatorName, value, validatorOptions, path) {
     if (validatorName in this._validations) {
       return this._validations[validatorName](
         nameValue,
         value,
-        validatorOptions
+        validatorOptions,
+        path
       );
     } else {
       throw new utils.BaseValidationError(
         `${validatorName} not found`,
         validatorName
       );
+    }
+  }
+  _handlerError(e) {
+    if (e instanceof utils.BaseValidationError) {
+      if (this._options["abortEarly"]) {
+        throw e;
+      }
+      this._errors.push({
+        type: e.name,
+        message: e.message,
+        property: e.property,
+        path: e.path
+      });
     }
   }
 }

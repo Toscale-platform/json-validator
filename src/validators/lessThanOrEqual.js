@@ -1,13 +1,13 @@
 const utils = require("../utils");
 
 class LessThanOrEqualValidationError extends utils.BaseValidationError {
-  constructor(message, property) {
-    super(message, property);
+  constructor(message, property, path) {
+    super(message, property, path);
     this.name = "LessThanOrEqualValidationError";
   }
 }
 
-module.exports = function(key, value, maxValue) {
+module.exports = function(key, value, maxValue, path) {
   const type = utils.typeOf(value);
   switch (type) {
     case "boolean":
@@ -18,7 +18,8 @@ module.exports = function(key, value, maxValue) {
       } else {
         throw new LessThanOrEqualValidationError(
           `${value} should be less than or equal ${maxValue}`,
-          key
+          key,
+          path
         );
       }
     case "string":
@@ -27,7 +28,8 @@ module.exports = function(key, value, maxValue) {
       } else {
         throw new LessThanOrEqualValidationError(
           `Length of ${value} should be less than or equal ${maxValue}`,
-          key
+          key,
+          path
         );
       }
     case "object":
@@ -38,7 +40,8 @@ module.exports = function(key, value, maxValue) {
           `Length of ${Object.keys(
             value
           )} should be less than or equal ${maxValue}`,
-          key
+          key,
+          path
         );
       }
   }

@@ -1,13 +1,13 @@
 const utils = require("../utils");
 
 class MoreThanOrEqualValidationError extends utils.BaseValidationError {
-  constructor(message, property) {
-    super(message, property);
+  constructor(message, property, path) {
+    super(message, property, path);
     this.name = "MoreThanOrEqualValidationError";
   }
 }
 
-module.exports = function(key, value, minValue) {
+module.exports = function(key, value, minValue, path) {
   const type = utils.typeOf(value);
   switch (type) {
     case "number":
@@ -16,7 +16,8 @@ module.exports = function(key, value, minValue) {
       } else {
         throw new MoreThanOrEqualValidationError(
           `${value} should be more than or equal ${minValue}`,
-          key
+          key,
+          path
         );
       }
     case "string":
@@ -25,7 +26,8 @@ module.exports = function(key, value, minValue) {
       } else {
         throw new MoreThanOrEqualValidationError(
           `Length of ${value} should be more than or equal ${minValue}`,
-          key
+          key,
+          path
         );
       }
     case "object":
@@ -36,7 +38,8 @@ module.exports = function(key, value, minValue) {
           `Length of ${Object.keys(
             value
           )} should be more than or equal ${minValue}`,
-          key
+          key,
+          path
         );
       }
     default:

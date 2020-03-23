@@ -1,6 +1,12 @@
 const utils = require("../utils");
 
-module.exports = function(key, object, shouldBeType, isConvert = false) {
+module.exports = function(
+  key,
+  object,
+  shouldBeType,
+  path = "",
+  isConvert = false
+) {
   const typeObject = utils.typeOf(object[key]);
   if (typeObject === "undefined") {
     return true;
@@ -30,7 +36,8 @@ module.exports = function(key, object, shouldBeType, isConvert = false) {
     }
     throw new utils.BaseValidationError(
       `${key} should be ${shouldBeType}`,
-      key
+      key,
+      path
     );
   }
 };
