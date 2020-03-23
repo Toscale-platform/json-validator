@@ -1,4 +1,4 @@
-const JsonValidator = require("./index");
+const { JsonValidator } = require("./index");
 const validator = new JsonValidator();
 
 test("is required should be throw error", () => {
@@ -22,10 +22,8 @@ test("test", async () => {
       default: "a", // optional, default value
       validations: {
         // rules for validation
-        equal: ["a", "b", "qwe"],
-        regexp: "/*",
-        min: 0,
-        max: 3
+        in: ["a", "b", "qwe"],
+        regexp: "/*"
       }
     },
     {

@@ -2,27 +2,43 @@ const utils = require("./src/utils");
 const options = require("./src/options");
 const validators = require("./src/validators");
 
-module.exports = class JsonValidator {
+class JsonValidator {
   constructor(options = {}) {
-    this._supportedTypes = ["boolean", "number", "string", "array", "object"];
+    this._supportedTypes = ["boolean", "number", "string", "object"];
     this._validations = {};
     this._options = options;
     this._errors = [];
-    this.addValidationRule("equal", validators.equal);
-    this.addValidationRule("regexp", validators.regexp);
-    this.addValidationRule("min", validators.min);
-    this.addValidationRule("max", validators.max);
+
+    for (const validatorName of Object.keys(validators)) {
+      this.addValidationRule(validatorName, validators[validatorName]);
+    }
   }
-  async _validateSimpleType(object, schema) {
+  async _validateSimpleType(object, schema, path) {
     options.required("name", schema, true);
     options.required("type", schema, true);
-    validators.equal(schema.type, this._supportedTypes);
+    validators.in("type", schema.type, this._supportedTypes);
     options.default("required", schema, false);
     options.default("validations", schema, []);
     options.default("meta", schema, {});
-
-    options.required(schema.name, object, schema.required);
-    options.equalType(schema.name, object, schema.type);
+    try {
+      options.required(schema.name, object, schema.required);
+      options.equalType(
+        schema.name,
+        object,
+        schema.type,
+        this._options["convert"]
+      );
+    } catch (e) {
+      if (this._options["abortEarly"]) {
+        throw e;
+      }
+      this._errors.push({
+        type: e.name,
+        message: e.message,
+        property: schema.name,
+        path
+      });
+    }
     if ("default" in schema && !(schema.name in object)) {
       object[schema.name] = schema.default;
     }
@@ -31,47 +47,47 @@ module.exports = class JsonValidator {
       if (keyValidation in this._validations) {
         try {
           result = this.checkValidator(
+            schema.name,
             keyValidation,
             result,
             schema.validations[keyValidation]
           );
         } catch (e) {
-          this._errors.push({
-            type: e.name,
-            message: e.message
-          });
-
-          if (this._options["abortEarly"]) {
-            return;
+          if (e instanceof utils.BaseValidationError) {
+            if (this._options["abortEarly"]) {
+              throw e;
+            }
+            this._errors.push({
+              type: e.name,
+              message: e.message,
+              property: e.property,
+              path
+            });
           }
         }
       } else {
-        throw new Error(`Validation rule ${keyValidation} not found`);
+        throw new utils.BaseValidationError(
+          `Validation rule ${keyValidation} not found`,
+          keyValidation
+        );
       }
     }
     return result;
   }
-  async _validateStrongType(object, schema) {
+  async _validateStrongType(object, schema, path) {
     options.default("children", schema, []);
-    const objectValidation =
-      schema.name in object ? object[schema.name] : object;
     let result = schema.type === "object" ? {} : [];
-    const children = [];
     for (const child of schema.children) {
-      const tmpObj =
-        child.name in objectValidation ? objectValidation[child.name] : {};
-      children.push(await this._validateMain(tmpObj, child));
-    }
-    for (const child of children) {
-      if (schema.type === "object") {
-        Object.assign(result, child);
-      } else {
-        result.push(child);
-      }
+      const resultValidation = await this._validateMain(
+        object[schema.name],
+        child,
+        path + "/" + child.name
+      );
+      Object.assign(result, resultValidation);
     }
     return result;
   }
-  async _validateMain(object, schema) {
+  async _validateMain(object, schema, path) {
     const typeSchema = utils.typeOf(schema);
     let result = {};
     if (typeSchema === "array") {
@@ -84,16 +100,30 @@ module.exports = class JsonValidator {
       }
       return result;
     }
-    result[schema.name] = await this._validateSimpleType(object, schema);
-    if (schema.type === "array" || schema.type === "object") {
-      result[schema.name] = await this._validateStrongType(object, schema);
+    result[schema.name] = await this._validateSimpleType(object, schema, path);
+    if (schema.type === "object") {
+      result[schema.name] = await this._validateStrongType(
+        object,
+        schema,
+        path
+      );
     }
     return result;
   }
   async validate(object, schema) {
     this._errors = [];
+    let result;
+    try {
+      result = await this._validateMain(object, schema, ".");
+    } catch (e) {
+      this._errors.push({
+        type: e.name,
+        message: e.message,
+        property: e.property
+      });
+    }
     return {
-      result: await this._validateMain(object, schema),
+      result,
       isError: this._errors.length > 0,
       errors: this._errors
     };
@@ -102,14 +132,31 @@ module.exports = class JsonValidator {
     if (!(name in this._validations)) {
       this._validations[name] = handler;
     } else {
-      throw new Error(`Validation rule ${name} exist`);
+      throw new utils.BaseValidationError(
+        `Validation rule ${name} exist`,
+        name
+      );
     }
   }
-  checkValidator(validatorName, value, validatorOptions) {
+  checkValidator(nameValue, validatorName, value, validatorOptions) {
     if (validatorName in this._validations) {
-      return this._validations[validatorName](value, validatorOptions);
+      return this._validations[validatorName](
+        nameValue,
+        value,
+        validatorOptions
+      );
     } else {
-      throw new Error(`${validatorName} not found`);
+      throw new utils.BaseValidationError(
+        `${validatorName} not found`,
+        validatorName
+      );
     }
   }
+}
+
+module.exports = {
+  JsonValidator,
+  validators,
+  options,
+  utils
 };

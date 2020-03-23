@@ -5,3 +5,12 @@ module.exports.typeOf = function(variable) {
   }
   return typeObject;
 };
+
+module.exports.BaseValidationError = class BaseValidationError extends Error {
+  constructor(message, property) {
+    super();
+    this.name = "BaseValidationError";
+    this.message = message;
+    this.property = property;
+  }
+};

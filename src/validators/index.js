@@ -1,11 +1,9 @@
-const equal = require("./equal");
-const min = require("./min");
-const max = require("./max");
-const regexp = require("./regexp");
-
 module.exports = {
-  equal,
-  min,
-  max,
-  regexp
+  equal: require("./equal"),
+  lessThan: require("./lessThan"),
+  moreThan: require("./moreThan"),
+  lessThanOrEqual: require("./lessThanOrEqual"),
+  moreThanOrEqual: require("./moreThanOrEqual"),
+  regexp: require("./regexp"),
+  in: require("./in")
 };

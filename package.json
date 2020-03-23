@@ -1,8 +1,9 @@
 {
-  "name": "json-validator",
-  "version": "1.0.0",
+  "name": "@toscale/json-validator",
+  "version": "1.1.0",
   "description": "Simple json validator",
   "main": "index.js",
+  "repository": "https://github.com/Toscale-platform/json-validator.git",
   "scripts": {
     "test": "jest"
   },
