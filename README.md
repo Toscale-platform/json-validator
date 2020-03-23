@@ -8,15 +8,18 @@
 const schema = [
     {
       name: "test", // required, name field
-      type: "string", // required, supported types: boolean, string, number, object, array
+      type: "string", // required, supported types: boolean, string, number, object
       required: true, // optional, is required variable
       default: "a", // optional, default value
       validations: {
         // rules for validation
-        equal: ["a", "b", "qwe"],
+        in: ["a", "b", "qwe"],
+        equal: "a",
         regexp: "/*",
-        min: 0,
-        max: 3
+        moreThan: 0,
+        moreThanOrEqual: 1,
+        lessThan: 3,
+        lessThanOrEqual: 2
       }
     },
     {
@@ -27,14 +30,12 @@ const schema = [
       children: [
         {
           name: "rate",
-          type: "array",
-          children: [
-            // children is required for types: array and object
-            {
-              name: "value",
-              type: "number"
-            }
-          ]
+          type: "number",
+          default: 0,
+          meta: {
+            title: "It is title",
+            description: ""
+          }
         }
       ]
     }
@@ -43,20 +44,27 @@ const schema = [
 const JsonValidator = require("json-validator");
 
 const options = {
-  abortEarly: false
+  abortEarly: false,
+  convert: true
 };
 
 const validator = new JsonValidator(options);
 
   validator
-    .validate([{ test: "qwe" }, { maxRate: { rate: [{ value: 1 }] } }], schema)
+    .validate([{ test: "qwe" }, { maxRate: { rate: 1 } }], schema)
     .then(result => {
       console.log(result);
       // print 
       {
         result: ..., // result validation,
         isError: false,
-        errors: [] //list of error
+        errors: [ //list of error
+          {
+            type: "...",
+            message: "...",
+            property: "..."
+          }
+        ]
       }
     });
 ```
