@@ -1,6 +1,6 @@
 # Install
 
-<code>npm i json-validator</code>
+<code>npm i @toscale/json-validator</code>
 
 # Usage
 
@@ -41,7 +41,7 @@ const schema = [
     }
   ];
 
-const JsonValidator = require("json-validator");
+const {JsonValidator} = require("json-validator");
 
 const options = {
   abortEarly: false,
@@ -62,7 +62,8 @@ const validator = new JsonValidator(options);
           {
             type: "...",
             message: "...",
-            property: "..."
+            property: "...",
+            path: "..."
           }
         ]
       }
@@ -72,13 +73,21 @@ const validator = new JsonValidator(options);
 ## Custom validation rule
 
 ```javascript
-validator.addValidationRule("nameValidator", function(value, option) {
+const {utils} = require("json-validator");
+
+class NameValidationError extends utils.BaseValidationError {
+  constructor(message, key, path) {
+    super(message, key, path);
+  }
+}
+
+validator.addValidationRule("nameValidator", function(key, value, options, path) {
   // if value is valid return value
   // else throw Error
   if (value) {
     return value;
   } else {
-    throw new Error("Validation message");
+    throw new NameValidationError("Validation message", key, path);
   }
 });
 ```

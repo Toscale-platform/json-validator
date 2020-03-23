@@ -1,0 +1,81 @@
+{
+  "definitions": {
+    "item": {
+      "type": "object",
+      "if": {
+        "properties": {
+          "type": {
+            "const": "object"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "name",
+          "type",
+          "children"
+        ]
+      },
+      "else": {
+        "required": [
+          "name",
+          "type"
+        ]
+      },
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "boolean",
+            "string",
+            "number",
+            "object"
+          ]
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        },
+        "default": {},
+        "children": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/definitions/item"
+          }
+        },
+        "validations": {
+          "type": "object",
+          "default": {},
+          "properties": {
+            "in": {
+              "type": "array"
+            },
+            "equal": {},
+            "moreThan": {},
+            "lessThan": {},
+            "moreThanOrEqual": {},
+            "lessThanOrEqual": {},
+            "regexp": {}
+          }
+        },
+        "meta": {
+          "type": "object",
+          "default": {},
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$ref": "#/definitions/item"
+}
