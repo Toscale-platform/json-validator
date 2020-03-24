@@ -23,8 +23,7 @@ test("test", async () => {
       validations: {
         // rules for validation
         in: ["a", "b", "qwe"],
-        regexp: "/*",
-        min: 0
+        regexp: "/*"
       }
     },
     {
@@ -35,12 +34,17 @@ test("test", async () => {
       children: [
         {
           name: "rate",
-          type: "array",
+          type: "object",
           children: [
             // children is required for types: array and object
             {
               name: "value",
               type: "number"
+            },
+            {
+              name: "auto",
+              type: "boolean",
+              required: true
             }
           ]
         }
@@ -48,7 +52,7 @@ test("test", async () => {
     }
   ];
   validator
-    .validate([{ test: "qwe" }, { maxRate: { rate: [{ value: 1 }] } }], schema)
+    .validate({ test: "qwe", maxRate: { rate: { value: 1 } } }, schema)
     .then(result => {
       console.log(result);
     });

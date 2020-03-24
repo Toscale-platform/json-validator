@@ -61,29 +61,19 @@ class JsonValidator {
   }
   async _validateStrongType(object, schema, path) {
     options.default("children", schema, []);
-    let result = {};
-    for (const child of schema.children) {
-      const resultValidation = await this._validateMain(
-        object[schema.name],
-        child,
-        path + "/" + child.name
-      );
-      Object.assign(result, resultValidation);
-    }
-    return result;
+    return await this._validateMain(object, schema.children, path);
   }
   async _validateMain(object, schema, path) {
     const typeSchema = utils.typeOf(schema);
     let result = {};
     if (typeSchema === "array") {
-      result = [];
-      for (const schemaKey of Object.keys(schema)) {
-        const objectValidation = schemaKey in object ? object[schemaKey] : {};
-        result.push(
+      for (const schemaItem of schema) {
+        Object.assign(
+          result,
           await this._validateMain(
-            objectValidation,
-            schema[schemaKey],
-            path + "/" + schemaKey
+            object,
+            schemaItem,
+            path + "/" + schemaItem.name
           )
         );
       }

@@ -77,5 +77,15 @@
       }
     }
   },
-  "$ref": "#/definitions/item"
+  "oneOf": [
+    {
+      "$ref": "#/definitions/item"
+    },
+    {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/item"
+      }
+    }
+  ]
 }
