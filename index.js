@@ -4,7 +4,7 @@ const validators = require("./src/validators");
 
 class JsonValidator {
   constructor(options = {}) {
-    this._supportedTypes = ["boolean", "number", "string", "object"];
+    this._supportedTypes = ["boolean", "number", "string", "object", "array"];
     this._validations = {};
     this._options = options;
     this._errors = [];
@@ -32,7 +32,11 @@ class JsonValidator {
     } catch (e) {
       this._handlerError(e);
     }
-    if ("default" in schema && !(schema.name in object)) {
+    if (
+      "default" in schema &&
+      !(schema.name in object) &&
+      options.equalType("default", schema.default, schema.type, path)
+    ) {
       object[schema.name] = schema.default;
     }
     let result = object[schema.name];
@@ -60,8 +64,9 @@ class JsonValidator {
     return result;
   }
   async _validateStrongType(object, schema, path) {
+    const objValidation = schema.name in object ? object[schema.name] : {};
     options.default("children", schema, []);
-    return await this._validateMain(object, schema.children, path);
+    return await this._validateMain(objValidation, schema.children, path);
   }
   async _validateMain(object, schema, path) {
     const typeSchema = utils.typeOf(schema);
@@ -77,6 +82,18 @@ class JsonValidator {
           )
         );
       }
+      if (
+        this._options["allowUnknown"] &&
+        Object.keys(object).length !== Object.keys(result).length
+      ) {
+        const resultKeys = Object.keys(result);
+        const unknownKeys = Object.keys(object).filter(
+          e => !resultKeys.includes(e)
+        );
+        for (const unknownKey of unknownKeys) {
+          result[unknownKey] = utils.deepCopy(object[unknownKey]);
+        }
+      }
       return result;
     }
     result[schema.name] = await this._validateSimpleType(object, schema, path);
@@ -86,6 +103,25 @@ class JsonValidator {
         schema,
         path
       );
+    }
+    if (schema.type === "array") {
+      // options.equalType(
+      //   schema.name,
+      //   object[schema.name],
+      //   schema.type,
+      //   path,
+      //   false
+      // );
+      // const resultArray = [];
+      // for (const [item, index] of Object.entries(object[schema.name])) {
+      //   const itemSchema = utils.deepCopy(schema.items);
+      //   itemSchema.name = index;
+      //   itemSchema.required = true;
+      //   resultArray.push(
+      //     await this._validateMain(item, itemSchema, path + "/" + index)
+      //   );
+      // }
+      // result[schema.name] = resultArray;
     }
     return result;
   }

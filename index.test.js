@@ -1,5 +1,7 @@
 const { JsonValidator } = require("./index");
-const validator = new JsonValidator();
+const validator = new JsonValidator({
+  allowUnknown: true
+});
 
 test("is required should be throw error", () => {
   const schema = [
@@ -35,25 +37,24 @@ test("test", async () => {
         {
           name: "rate",
           type: "object",
-          children: [
-            // children is required for types: array and object
-            {
-              name: "value",
-              type: "number"
-            },
-            {
-              name: "auto",
-              type: "boolean",
-              required: true
+          children: []
+        },
+        {
+          name: "auto",
+          type: "array",
+          items: {
+            type: "string",
+            validations: {
+              moreThan: 10
             }
-          ]
+          }
         }
       ]
     }
   ];
-  validator
-    .validate({ test: "qwe", maxRate: { rate: { value: 1 } } }, schema)
-    .then(result => {
-      console.log(result);
-    });
+  let data = { a: 1, test: "qwe", maxRate: { rate: { value: 1, auto: [] } } };
+  const result = await validator.validate(data, schema);
+  console.log(data, result);
+  data = Object.assign({}, data, result.result);
+  console.log(data);
 });

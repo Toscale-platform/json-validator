@@ -30,6 +30,16 @@ module.exports = function(key, value, minValue, path = "") {
           path
         );
       }
+    case "array":
+      if (value.length > minValue) {
+        return value;
+      } else {
+        throw new MoreThanValidationError(
+          `Length of ${value} should be greater than ${minValue}`,
+          key,
+          path
+        );
+      }
     case "object":
       if (Object.keys(value).length > minValue) {
         return value;
