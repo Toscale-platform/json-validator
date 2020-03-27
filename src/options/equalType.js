@@ -7,7 +7,7 @@ module.exports = function(
   path = "",
   isConvert = false
 ) {
-  const typeObject = utils.typeOf(object[key]);
+  const typeObject = utils.typeOf(object);
   if (typeObject === "undefined") {
     return true;
   }
@@ -16,22 +16,19 @@ module.exports = function(
   } else {
     if (isConvert) {
       if (shouldBeType === "number" && typeObject === "string") {
-        const number = Number(object[key]);
+        const number = Number(object);
         if (!isNaN(number)) {
-          object[key] = number;
-          return true;
+          return number;
         }
       } else if (shouldBeType === "boolean" && typeObject === "string") {
-        switch (object[key]) {
+        switch (object) {
           case "true":
-            object[key] = true;
             return true;
           case "false":
-            object[key] = false;
-            return true;
+            return false;
         }
       } else if (shouldBeType === "string") {
-        object[key] = object[key].toString();
+        return object.toString();
       }
     }
     throw new utils.BaseValidationError(

@@ -32,6 +32,16 @@ module.exports = function(key, value, maxValue, path = "") {
           path
         );
       }
+    case "array":
+      if (value.length < maxValue) {
+        return value;
+      } else {
+        throw new LessThanValidationError(
+          `Length of ${value} should be less than ${maxValue}`,
+          key,
+          path
+        );
+      }
     case "object":
       if (Object.keys(value).length < maxValue) {
         return value;

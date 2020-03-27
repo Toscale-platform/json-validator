@@ -1,17 +1,21 @@
 {
   "name": "@toscale/json-validator",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "Simple json validator",
   "main": "index.js",
   "repository": "https://github.com/Toscale-platform/json-validator.git",
   "scripts": {
     "test": "jest"
   },
-  "keywords": ["json", "validator", "schema"],
+  "keywords": [
+    "json",
+    "validator",
+    "schema"
+  ],
   "author": "ToScale",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^25.1.0",
+    "jest": "^25.2.3",
     "prettier": "^1.19.1"
   }
 }

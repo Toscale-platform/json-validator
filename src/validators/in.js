@@ -12,7 +12,7 @@ module.exports = function(key, value, equalValues = [], path = "") {
     return value;
   } else {
     throw new InValidationError(
-      `${key} should be in ${equalValues}`,
+      `${value} should be in ${equalValues}`,
       key,
       path
     );

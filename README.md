@@ -8,7 +8,7 @@
 const schema = [
     {
       name: "test", // required, name field
-      type: "string", // required, supported types: boolean, string, number, object
+      type: "string", // required, supported types: boolean, string, number, object, array
       required: true, // optional, is required variable
       default: "a", // optional, default value
       validations: {

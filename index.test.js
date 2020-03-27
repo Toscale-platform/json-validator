@@ -21,7 +21,7 @@ test("test", async () => {
       name: "test", // required, name field
       type: "string", // required, supported types: boolean, string, number, object, array
       required: true, // optional, is required variable
-      default: "a", // optional, default value
+      // default: "a", // optional, default value
       validations: {
         // rules for validation
         in: ["a", "b", "qwe"],
@@ -31,9 +31,13 @@ test("test", async () => {
     {
       name: "maxRate",
       type: "object",
-      required: true,
       default: {},
       children: [
+        {
+          name: "test",
+          type: "number",
+          required: true
+        },
         {
           name: "rate",
           type: "object",
@@ -42,17 +46,25 @@ test("test", async () => {
         {
           name: "auto",
           type: "array",
+          required: true,
           items: {
             type: "string",
             validations: {
-              moreThan: 10
+              moreThan: 0
             }
+          },
+          validations: {
+            moreThan: 1
           }
         }
       ]
     }
   ];
-  let data = { a: 1, test: "qwe", maxRate: { rate: { value: 1, auto: [] } } };
+  let data = {
+    a: 1,
+    test: "qwe",
+    maxRate: { rate: { value: 1 }, auto: ["1", "11"], test: 1 }
+  };
   const result = await validator.validate(data, schema);
   console.log(data, result);
   data = Object.assign({}, data, result.result);

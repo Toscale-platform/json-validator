@@ -18,7 +18,9 @@ module.exports.deepCopy = function(inObject) {
   for (const key of Object.keys(inObject)) {
     value = inObject[key];
     outObject[key] =
-      typeof value === "object" && value !== null ? deepCopy(value) : value;
+      typeof value === "object" && value !== null
+        ? this.deepCopy(value)
+        : value;
   }
 
   return outObject;
