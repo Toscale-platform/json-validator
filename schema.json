@@ -1,5 +1,108 @@
 {
   "definitions": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "boolean",
+        "string",
+        "number",
+        "object",
+        "array"
+      ]
+    },
+    "validations": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "in": {
+          "type": "array"
+        },
+        "equal": {},
+        "moreThan": {},
+        "lessThan": {},
+        "moreThanOrEqual": {},
+        "lessThanOrEqual": {},
+        "regexp": {}
+      }
+    },
+    "meta": {
+      "type": "object",
+      "default": {},
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "children": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "$ref": "#/definitions/item"
+      }
+    },
+    "items": {
+      "type": "object",
+      "if": {
+        "properties": {
+          "type": {
+            "const": "object"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "type",
+          "children"
+        ]
+      },
+      "else": {
+        "if": {
+          "properties": {
+            "type": {
+              "const": "array"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "type",
+            "items"
+          ]
+        },
+        "else": {
+          "required": [
+            "type"
+          ]
+        },
+        "properties": {
+          "type": {
+            "$ref": "#/definitions/type"
+          },
+          "children": {
+            "$ref": "#/definitions/children"
+          },
+          "items": {
+            "$ref": "#/definitions/items"
+          },
+          "validations": {
+            "$ref": "#/definitions/validations"
+          },
+          "meta": {
+            "$ref": "#/definitions/meta"
+          }
+        }
+      },
+      "validations": {
+        "$ref": "#/definitions/validations"
+      },
+      "meta": {
+        "#ref": "#/definitions/meta"
+      }
+    },
     "item": {
       "type": "object",
       "if": {
@@ -17,23 +120,33 @@
         ]
       },
       "else": {
-        "required": [
-          "name",
-          "type"
-        ]
+        "if": {
+          "properties": {
+            "type": {
+              "const": "array"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "name",
+            "type",
+            "items"
+          ]
+        },
+        "else": {
+          "required": [
+            "name",
+            "type"
+          ]
+        }
       },
       "properties": {
         "name": {
           "type": "string"
         },
         "type": {
-          "type": "string",
-          "enum": [
-            "boolean",
-            "string",
-            "number",
-            "object"
-          ]
+          "$ref": "#/definitions/type"
         },
         "required": {
           "type": "boolean",
@@ -41,39 +154,9 @@
         },
         "default": {},
         "children": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "$ref": "#/definitions/item"
-          }
+          "$ref": "#/definitions/children"
         },
-        "validations": {
-          "type": "object",
-          "default": {},
-          "properties": {
-            "in": {
-              "type": "array"
-            },
-            "equal": {},
-            "moreThan": {},
-            "lessThan": {},
-            "moreThanOrEqual": {},
-            "lessThanOrEqual": {},
-            "regexp": {}
-          }
-        },
-        "meta": {
-          "type": "object",
-          "default": {},
-          "properties": {
-            "title": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            }
-          }
-        }
+        "items": {"$ref": "#/definitions/items"}
       }
     }
   },

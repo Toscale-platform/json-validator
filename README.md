@@ -23,7 +23,20 @@ const schema = [
       }
     },
     {
-      name: "maxRate",
+        name: "testArray",
+        type: "array",
+        items: {
+          type: "number",
+          validations: {
+            moreThan: 5,
+          }
+        },
+        validations: {
+          moreThan: 2 // length of array should be more than 2
+        }
+    },
+    {
+      name: "testObject",
       type: "object",
       required: true,
       default: {},
@@ -38,6 +51,19 @@ const schema = [
           }
         }
       ]
+    },
+    {
+      oneOf: [
+        {
+          name: "oneOfTestA",
+          type: "number",
+          validations: {}
+        },
+        {
+          name: "oneOfTestB",
+          test: "boolean"
+        } 
+      ]
     }
   ];
 
@@ -45,7 +71,8 @@ const {JsonValidator} = require("json-validator");
 
 const options = {
   abortEarly: false,
-  convert: true
+  convert: true,
+  allowUnknown: true
 };
 
 const validator = new JsonValidator(options);
