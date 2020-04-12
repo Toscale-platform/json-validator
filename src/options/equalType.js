@@ -2,33 +2,33 @@ const utils = require("../utils");
 
 module.exports = function(
   key,
-  object,
+  value,
   shouldBeType,
   path = "",
   isConvert = false
 ) {
-  const typeObject = utils.typeOf(object);
+  const typeObject = utils.typeOf(value);
   if (typeObject === "undefined") {
-    return true;
+    return undefined;
   }
   if (typeObject === shouldBeType) {
-    return true;
+    return value;
   } else {
     if (isConvert) {
       if (shouldBeType === "number" && typeObject === "string") {
-        const number = Number(object);
+        const number = Number(value);
         if (!isNaN(number)) {
           return number;
         }
       } else if (shouldBeType === "boolean" && typeObject === "string") {
-        switch (object) {
+        switch (value) {
           case "true":
             return true;
           case "false":
             return false;
         }
       } else if (shouldBeType === "string") {
-        return object.toString();
+        return value.toString();
       }
     }
     throw new utils.BaseValidationError(

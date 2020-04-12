@@ -61,23 +61,16 @@ class JsonValidator {
       options.default("required", schema, false);
       const isRequired = existDefault ? false : schema.required;
       options.required(schema.name, object, isRequired, path);
-      options.equalType(
+      if (existDefault && !(schema.name in object)) {
+        object[schema.name] = schema.default;
+      }
+      object[schema.name] = options.equalType(
         schema.name,
         object[schema.name],
         schema.type,
         path,
         this._options["convert"]
       );
-      if (existDefault && !(schema.name in object)) {
-        options.equalType(
-          "default",
-          schema.default,
-          schema.type,
-          path,
-          this._options["convert"]
-        );
-        object[schema.name] = schema.default;
-      }
     } catch (e) {
       errors.push(this._handlerError(e));
     }
