@@ -33,11 +33,15 @@ test("test", async () => {
       oneOf: [
         {
           name: "testA",
-          type: "string"
+          type: "string",
+          default: "a",
+          required: true
         },
         {
           name: "testB",
-          type: "number"
+          type: "number",
+          default: 2,
+          required: true
         }
       ]
     },
@@ -76,9 +80,9 @@ test("test", async () => {
   let data = {
     a: 1,
     test: "a",
-    testA: "1",
+    // testA: "1",
     testB: 1,
-    maxRate: { rate: { value: 1 }, auto: ["1", "11"], test: 1 }
+    maxRate: { rate: { value: 1 }, auto: [4, 3, 5, 6], test: 1 }
   };
   const result = await validator.validate(data, schema);
   console.log(data, result);

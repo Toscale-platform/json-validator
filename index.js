@@ -213,11 +213,11 @@ class JsonValidator {
         continue;
       }
       const validationResult = await this._validateMain(
-        object,
+        utils.deepCopy(object),
         schemaOneOf,
         path
       );
-      if (
+      if (schemaOneOf.name in object &&
         !validationResult.isError &&
         validationResult.result[schemaOneOf.name] !== undefined
       ) {
