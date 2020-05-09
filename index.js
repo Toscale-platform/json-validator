@@ -206,42 +206,49 @@ class JsonValidator {
       isError: false,
       errors: []
     };
+    let defaultValue = {
+      result: {},
+      isError: false,
+      errors: []
+    };
+
     let isMatch = false;
     for (const schemaOneOf of schemas) {
-      // if (isMatch && schemaOneOf.name in object) {
-      //   delete object[schemaOneOf.name];
-      //   // continue;
-      // }
+      if (isMatch && schemaOneOf.name in object) {
+        delete object[schemaOneOf.name];
+      }
       const validationResult = await this._validateMain(
         utils.deepCopy(object),
-        schemaOneOf,
+        [schemaOneOf],
         path
       );
       if (!validationResult.isError &&
         validationResult.result[schemaOneOf.name] !== undefined
       ) {
-        result.result[schemaOneOf.name] =
-          validationResult.result[schemaOneOf.name];
-        result.errors.push(...validationResult.errors);
-        result.isError = result.errors.length > 0;
-        isMatch = true;
-      }
-    }
-    if (Object.keys(result.result).length > 1) {
-      for (const name of Object.keys(result.result)) {
-        const schema = schemas.find(e => e.name === name);
-        if (schema && 'default' in schema && !(name in object)) {
-          delete result.result[name];
+        if ('default' in schemaOneOf) {
+          defaultValue.result[schemaOneOf.name] =
+              validationResult.result[schemaOneOf.name];
+          defaultValue.errors.push(...validationResult.errors);
+          defaultValue.isError = result.errors.length > 0;
+        } else {
+          result.result[schemaOneOf.name] =
+              validationResult.result[schemaOneOf.name];
+          result.errors.push(...validationResult.errors);
+          result.isError = result.errors.length > 0;
         }
       }
     }
-    if (!isMatch) {
-      result.errors.push(
-        this._handlerError(
-          new utils.BaseValidationError("Not match schema", "oneOf", path)
-        )
-      );
-      result.isError = result.errors.length > 0;
+    if (Object.keys(result.result).length === 0) {
+      if (Object.keys(defaultValue.result).length !== 0 && !defaultValue.isError) {
+        result = defaultValue;
+      }else {
+        result.errors.push(
+            this._handlerError(
+                new utils.BaseValidationError("Not match schema", "oneOf", path)
+            )
+        );
+        result.isError = result.errors.length > 0;
+      }
     }
 
     return result;
