@@ -208,17 +208,16 @@ class JsonValidator {
     };
     let isMatch = false;
     for (const schemaOneOf of schemas) {
-      if (isMatch && schemaOneOf.name in object) {
-        delete object[schemaOneOf.name];
-        continue;
-      }
+      // if (isMatch && schemaOneOf.name in object) {
+      //   delete object[schemaOneOf.name];
+      //   // continue;
+      // }
       const validationResult = await this._validateMain(
         utils.deepCopy(object),
         schemaOneOf,
         path
       );
-      if (schemaOneOf.name in object &&
-        !validationResult.isError &&
+      if (!validationResult.isError &&
         validationResult.result[schemaOneOf.name] !== undefined
       ) {
         result.result[schemaOneOf.name] =
@@ -226,6 +225,14 @@ class JsonValidator {
         result.errors.push(...validationResult.errors);
         result.isError = result.errors.length > 0;
         isMatch = true;
+      }
+    }
+    if (Object.keys(result.result).length > 1) {
+      for (const name of Object.keys(result.result)) {
+        const schema = schemas.find(e => e.name === name);
+        if (schema && 'default' in schema && !(name in object)) {
+          delete result.result[name];
+        }
       }
     }
     if (!isMatch) {
@@ -236,6 +243,7 @@ class JsonValidator {
       );
       result.isError = result.errors.length > 0;
     }
+
     return result;
   }
 
