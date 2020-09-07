@@ -2,10 +2,9 @@ const { JsonValidator } = require("./index");
 const validator = new JsonValidator({
   allowUnknown: true,
   convert: true,
-  abortEarly: false
+  abortEarly: true
 });
 const lending = require("../services/Lending/settingsTemplate.json");
-
 
 test("is required should be throw error", () => {
   const schema = [
@@ -96,15 +95,14 @@ test("lending settings", async () => {
     return value;
   });
   const data = {
-    symbol: 'BTC',
+    symbol: "BTC",
     minRate: { auto: true },
     duration: { auto: true },
     amount: { auto: true },
-    sleep: { value: '8' },
+    sleep: { value: "8" },
     leaveOnBalance: 0,
     maxRange: { enable: false, rate: 100, duration: 2 }
   };
   const result = await validator.validate(data, lending);
   console.log(data, result);
-
 });
